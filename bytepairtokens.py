@@ -204,6 +204,7 @@ for first_word, optional_number, definition, vid in {
     )
 
 wordlist = {normalize_tupi(v["f"]).strip() for v in tupi_only}
+# wordlist = list(wordlist) + list({normalize_tupi(v.strip()).strip() for v in tupi_text.replace('\n', ' ').split(' ')})
 
 # identift the index of the first numeric character in a string
 def first_numeric_index(s):
@@ -227,17 +228,17 @@ def is_navarro(s):
     return is_made_of_substrings(s, navarro)
 
 wordlist = {v[:first_numeric_index(v)] if first_numeric_index(v) else v for v in wordlist}
-wordlist = {v.strip() for v in wordlist if is_navarro(v)}
+wordlist = {v.strip() for v in wordlist if is_navarro(v) and  v != ""}
 
 import sentencepiece as spm
 spm.SentencePieceTrainer.train(input='docs/tupi_text.txt'
                                , model_prefix='m'
-                               , vocab_size=7261
+                               , vocab_size=7362
                                , model_type='bpe'
                                , user_defined_symbols=list(wordlist))
 sp = spm.SentencePieceProcessor(model_file='m.model')
 
-for i, row in enumerate(tupi_rows[:15]):
+for i, row in enumerate(tupi_rows[:150]):
     row = normalize_tupi(row)
     tokenized_sentence = sp.encode(row, out_type=str)
     print(f"Original:\t {row}\nTokenized:\t {'|'.join(tokenized_sentence)}\n")
